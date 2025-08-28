@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Employee Form</title>
+</head>
+<body>
+  <form id="employee-form">
+    <input type="text" name="firstName" placeholder="First Name" required />
+    <input type="text" name="lastName" placeholder="Last Name" required />
+    <input type="date" name="birthDate" required />
+    <input type="email" name="email" placeholder="Email" required />
+    <input type="tel" name="phoneNumber" placeholder="Phone Number" required />
+    
+    <select id="department-select">
+      <option value="">Select a department</option>
+    </select>
+
+    <button type="submit">Add Employee</button>
+  </form>
+
+  <!-- ✅ Wrap fetch logic inside DOMContentLoaded -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      fetch('/api/departments')
+        .then(res => res.json())
+        .then(data => {
+          const select = document.getElementById('department');
+          if (!select) return; // Safety check
+          data.forEach(dept => {
+            const option = document.createElement('option');
+            option.value = dept._id;
+            option.textContent = dept.name;
+            select.appendChild(option);
+          });
+        })
+        .catch(err => console.error('Error fetching departments:', err));
+    });
+  </script>
+
+  <!-- ✅ Load external JS after DOM elements -->
+  <script src="js/main.js"></script>
+</body>
+</html>
