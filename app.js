@@ -1,39 +1,56 @@
 // app.js
 const express = require('express');
 const path = require('path');
-const mongoose = require('mongoose'); // If you're using MongoDB
+const mongoose = require('mongoose');
+const Employee = require('./models/Employee');
+const Department = require('./models/Department');
+
 const app = express();
 
-// Middleware to parse JSON bodies
+// Middleware
 app.use(express.json());
-
-// Serve static files from the "public" folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Sample department data
-const departments = [
-  { id: 1, name: 'Engineering' },
-  { id: 2, name: 'Marketing' },
-  { id: 3, name: 'Human Resources' },
-  { id: 4, name: 'Finance' },
-];
+// MongoDB connection
+mongoose.connect('mongodb://localhost:27017/employees', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => console.log('✅ Connected to MongoDB'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// API endpoint to get departments
-app.get('/api/departments', (req, res) => {
-  res.status(200).json(departments);
+// Routes
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Define your Employee model (simplified example)
-const mongooseSchema = mongoose.Schema({
-  name: String,
-  dob: String,
-  email: String,
-  phone: String,
-  department: String,
+app.get('/api/departments', async (req, res) => {
+  try {
+    const departments = await Department.find();
+    res.json(departments);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching departments', error: err });
+  }
 });
-const Employee = mongoose.model('Employee', mongooseSchema);
 
-// API endpoint to save employee data
+app.post('/api/departments', async (req, res) => {
+  try {
+    const department = new Department(req.body);
+    await department.save();
+    res.status(201).json({ message: 'Department created successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error creating department', error: err });
+  }
+});
+
+app.get('/api/employees', async (req, res) => {
+  try {
+    const employees = await Employee.find().populate('department');
+    res.json(employees);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching employees', error: err });
+  }
+});
+
 app.post('/api/employees', async (req, res) => {
   try {
     const employee = new Employee(req.body);
@@ -44,16 +61,4 @@ app.post('/api/employees', async (req, res) => {
   }
 });
 
-// Connect to MongoDB (update with your URI)
-mongoose.connect('mongodb://localhost:27017/employeesDB', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => {
-  console.log('Connected to MongoDB');
-}).catch(err => {
-  console.error('MongoDB connection error:', err);
-});
-
-// Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+module.exports = app;
