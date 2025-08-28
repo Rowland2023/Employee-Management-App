@@ -1,32 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Employee Form</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Employee Management Application</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <form id="employee-form">
-    <input type="text" name="firstName" placeholder="First Name" required />
-    <input type="text" name="lastName" placeholder="Last Name" required />
-    <input type="date" name="birthDate" required />
-    <input type="email" name="email" placeholder="Email" required />
-    <input type="tel" name="phoneNumber" placeholder="Phone Number" required />
-    
-    <select id="department-select">
-      <option value="">Select a department</option>
-    </select>
+  <header>
+    <h1 class="app-title">Employee Management Application</h1>
+  </header>
 
-    <button type="submit">Add Employee</button>
-  </form>
+  <main>
+    <form id="employee-form">
+      <div class="form-group">
+        <input type="text" name="firstName" placeholder="First Name" required />
+        <input type="text" name="lastName" placeholder="Last Name" required />
+      </div>
 
-  <!-- ✅ Wrap fetch logic inside DOMContentLoaded -->
+      <div class="form-group">
+        <input type="date" name="birthDate" required />
+        <input type="email" name="email" placeholder="Email" required />
+        <input type="tel" name="phoneNumber" placeholder="Phone Number" required />
+      </div>
+
+      <div class="form-group">
+        <select id="department-select" name="department" required>
+          <option value="">Select a department</option>
+        </select>
+      </div>
+
+      <button type="submit">Add Employee</button>
+    </form>
+  </main>
+
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       fetch('/api/departments')
         .then(res => res.json())
         .then(data => {
-          const select = document.getElementById('department');
-          if (!select) return; // Safety check
+          const select = document.getElementById('department-select');
+          if (!select) return;
           data.forEach(dept => {
             const option = document.createElement('option');
             option.value = dept._id;
@@ -38,7 +52,6 @@
     });
   </script>
 
-  <!-- ✅ Load external JS after DOM elements -->
   <script src="js/main.js"></script>
 </body>
 </html>
