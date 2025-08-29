@@ -13,6 +13,20 @@ router.get('/', async (req, res) => {
   }
 });
 
+// ✅ GET single employee by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const employee = await Employee.findById(req.params.id).populate('department');
+    if (!employee) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+    res.status(200).json(employee);
+  } catch (error) {
+    console.error('Error fetching employee by ID:', error);
+    res.status(500).json({ error: 'Internal server error while fetching employee' });
+  }
+});
+
 // POST new employee
 router.post('/', async (req, res) => {
   try {
