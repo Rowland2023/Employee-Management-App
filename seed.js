@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 const Department = require('./models/Department');
 
-mongoose.connect('mongodb://localhost:27017/employees', {
+mongoose.connect('mongodb://localhost:27017/employee', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(async () => {
@@ -12,7 +12,16 @@ mongoose.connect('mongodb://localhost:27017/employees', {
     { name: 'Human Resources' },
     { name: 'Finance' },
   ];
-  await Department.insertMany(sampleDepartments);
-  console.log('✅ Departments seeded');
+
+  for (const dept of sampleDepartments) {
+    const exists = await Department.findOne({ name: dept.name });
+    if (!exists) {
+      await Department.create(dept);
+      console.log(`✅ Added department: ${dept.name}`);
+    } else {
+      console.log(`⚠️ Department already exists: ${dept.name}`);
+    }
+  }
+
   mongoose.disconnect();
 });
