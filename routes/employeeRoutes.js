@@ -1,20 +1,60 @@
 const express = require('express');
 const router = express.Router();
-const employeeController = require('../controllers/employeeController');
+const Employee = require('../models/Employee');
 
-// READ: Get all employees
-router.get('/', employeeController.getAllEmployees);
+// GET all employees
+router.get('/', async (req, res) => {
+  try {
+    const employees = await Employee.find().populate('department');
+    res.status(200).json(employees);
+  } catch (error) {
+    console.error('Error fetching employees:', error);
+    res.status(500).json({ error: 'Internal server error while fetching employees' });
+  }
+});
 
-// READ: Get a single employee by ID
-router.get('/:id', employeeController.getEmployeeById);
+// POST new employee
+router.post('/', async (req, res) => {
+  try {
+    const employee = new Employee(req.body);
+    const savedEmployee = await employee.save();
+    res.status(201).json(savedEmployee);
+  } catch (error) {
+    console.error('Error creating employee:', error);
+    res.status(400).json({ error: 'Invalid employee data' });
+  }
+});
 
-// CREATE: Add a new employee
-router.post('/', employeeController.createEmployee);
+// PUT update employee
+router.put('/:id', async (req, res) => {
+  try {
+    const updatedEmployee = await Employee.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    if (!updatedEmployee) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+    res.status(200).json(updatedEmployee);
+  } catch (error) {
+    console.error('Error updating employee:', error);
+    res.status(400).json({ error: 'Failed to update employee' });
+  }
+});
 
-// UPDATE: Update an employee by ID
-router.put('/:id', employeeController.updateEmployee);
-
-// DELETE: Remove an employee by ID
-router.delete('/:id', employeeController.deleteEmployee);
+// DELETE employee
+router.delete('/:id', async (req, res) => {
+  try {
+    const deletedEmployee = await Employee.findByIdAndDelete(req.params.id);
+    if (!deletedEmployee) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting employee:', error);
+    res.status(500).json({ error: 'Internal server error while deleting employee' });
+  }
+});
 
 module.exports = router;
